@@ -7,6 +7,10 @@ import {
   MessageCircle, Clock, AlertTriangle, Upload
 } from 'lucide-react';
 
+// --- IMPORTACIONES DE FIREBASE ---
+import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
+
 const defaultLevels = [
   {
     id: 'lvl-1',
@@ -76,19 +80,44 @@ const defaultCompanies = [
 export default function App() {
   const [role, setRole] = useState('admin'); // 'admin' | 'learner'
   const [adminAuth, setAdminAuth] = useState(false); // Estado de sesión del Admin
-  const [companies, setCompanies] = useState(defaultCompanies);
+  const [companies, setCompanies] = useState([]);
   const [currentCompanyId, setCurrentCompanyId] = useState(null);
   const [dialog, setDialog] = useState(null);
   const [globalProgress, setGlobalProgress] = useState({});
+  const [loadingDb, setLoadingDb] = useState(true);
 
   const showDialog = (options) => setDialog(options);
   const closeDialog = () => setDialog(null);
+
+  // --- CONEXIÓN EN TIEMPO REAL CON FIREBASE ---
+  useEffect(() => {
+    const unsubCompanies = onSnapshot(collection(db, 'companies'), (snapshot) => {
+      if (snapshot.empty) {
+        // Si la base de datos está vacía, subimos las empresas de prueba automáticamente
+        defaultCompanies.forEach(async (comp) => {
+          await setDoc(doc(db, 'companies', comp.id), comp);
+        });
+      } else {
+        const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCompanies(loaded);
+      }
+      setLoadingDb(false);
+    });
+
+    const unsubProgress = onSnapshot(collection(db, 'progress'), (snapshot) => {
+       const prog = {};
+       snapshot.docs.forEach(doc => { prog[doc.id] = doc.data(); });
+       setGlobalProgress(prog);
+    });
+
+    return () => { unsubCompanies(); unsubProgress(); };
+  }, []);
 
   // Escuchar y aplicar el hash (link directo)
   useEffect(() => {
     try {
       const hash = window.location.hash.replace('#', '');
-      if (hash) {
+      if (hash && companies.length > 0) {
         const found = companies.find(c => c.id === hash);
         if (found) {
           setCurrentCompanyId(hash);
@@ -115,9 +144,33 @@ export default function App() {
 
   const currentCompany = companies.find(c => c.id === currentCompanyId);
 
-  const handleUpdateCompany = (updatedCompany) => {
-    setCompanies(companies.map(c => c.id === updatedCompany.id ? updatedCompany : c));
+  // --- FUNCIONES PARA GUARDAR EN FIREBASE ---
+  const handleUpdateCompany = async (updatedCompany) => {
+    try { await setDoc(doc(db, 'companies', updatedCompany.id), updatedCompany); } 
+    catch (error) { console.error("Error guardando empresa:", error); }
   };
+
+  const handleDeleteCompany = async (companyId) => {
+    try { await deleteDoc(doc(db, 'companies', companyId)); } 
+    catch (error) { console.error("Error eliminando empresa:", error); }
+  };
+
+  const handleUpdateProgress = async (progKey, newProgressData) => {
+    try { await setDoc(doc(db, 'progress', progKey), newProgressData); } 
+    catch (error) { console.error("Error guardando progreso:", error); }
+  };
+
+  // PANTALLA DE CARGA
+  if (loadingDb) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center text-slate-500 animate-pulse">
+          <BookOpen className="w-12 h-12 mx-auto mb-4 text-indigo-300" />
+          <p className="text-xl font-bold">Conectando a la Base de Datos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative">
@@ -151,15 +204,35 @@ export default function App() {
           !adminAuth ? (
             <AdminLogin onLogin={() => setAdminAuth(true)} />
           ) : !currentCompanyId ? (
-            <AdminPortalSelector companies={companies} setCompanies={setCompanies} onSelectCompany={setCurrentCompanyId} showDialog={showDialog} onLogout={() => setAdminAuth(false)} />
+            <AdminPortalSelector 
+              companies={companies} 
+              onUpdateCompany={handleUpdateCompany} 
+              onDeleteCompany={handleDeleteCompany} 
+              onSelectCompany={setCurrentCompanyId} 
+              showDialog={showDialog} 
+              onLogout={() => setAdminAuth(false)} 
+            />
           ) : (
-            <AdminDashboard company={currentCompany} onUpdateCompany={handleUpdateCompany} onBack={() => setCurrentCompanyId(null)} companies={companies} showDialog={showDialog} globalProgress={globalProgress} />
+            <AdminDashboard 
+              company={currentCompany} 
+              onUpdateCompany={handleUpdateCompany} 
+              onBack={() => setCurrentCompanyId(null)} 
+              companies={companies} 
+              showDialog={showDialog} 
+              globalProgress={globalProgress} 
+            />
           )
         ) : (
           !currentCompanyId ? (
             <LearnerGateway companies={companies} onEnterCode={setCurrentCompanyId} />
           ) : (
-            <LearnerDashboard company={currentCompany} onUpdateCompany={handleUpdateCompany} globalProgress={globalProgress} setGlobalProgress={setGlobalProgress} onBack={() => setCurrentCompanyId(null)} />
+            <LearnerDashboard 
+              company={currentCompany} 
+              onUpdateCompany={handleUpdateCompany} 
+              globalProgress={globalProgress} 
+              onUpdateProgress={handleUpdateProgress} 
+              onBack={() => setCurrentCompanyId(null)} 
+            />
           )
         )}
       </main>
@@ -254,7 +327,7 @@ function AdminLogin({ onLogin }) {
   );
 }
 
-function AdminPortalSelector({ companies, setCompanies, onSelectCompany, showDialog, onLogout }) {
+function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSelectCompany, showDialog, onLogout }) {
   const handleAddCompany = () => {
     showDialog({
       type: 'prompt',
@@ -284,7 +357,7 @@ function AdminPortalSelector({ companies, setCompanies, onSelectCompany, showDia
             counter++;
           }
 
-          setCompanies([...companies, { id: finalSlug, name: name.trim(), settings: { maxScore: 100, passingScore: 70 }, levels: [], users: [], pendingRequests: [] }]);
+          onUpdateCompany({ id: finalSlug, name: name.trim(), settings: { maxScore: 100, passingScore: 70 }, levels: [], users: [], pendingRequests: [] });
         }
       }
     });
@@ -341,7 +414,7 @@ function AdminPortalSelector({ companies, setCompanies, onSelectCompany, showDia
                 <button onClick={(e) => copyLink(company.id, e)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition" title="Obtener enlace">
                   <LinkIcon className="w-5 h-5" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); setCompanies(companies.filter(c => c.id !== company.id)); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Eliminar">
+                <button onClick={(e) => { e.stopPropagation(); onDeleteCompany(company.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Eliminar">
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
@@ -791,7 +864,7 @@ function LearnerGateway({ companies, onEnterCode }) {
   );
 }
 
-function LearnerDashboard({ company, onUpdateCompany, globalProgress, setGlobalProgress, onBack }) {
+function LearnerDashboard({ company, onUpdateCompany, globalProgress, onUpdateProgress, onBack }) {
   const [loggedUser, setLoggedUser] = useState(null);
   const [authMode, setAuthMode] = useState('login'); 
   const [activeLevel, setActiveLevel] = useState(null);
@@ -856,7 +929,7 @@ function LearnerDashboard({ company, onUpdateCompany, globalProgress, setGlobalP
     );
   }
 
-  if (activeLevel) return <LevelPlayer level={activeLevel} settings={company.settings} userName={loggedUser.name} companyName={company.name} companyLogo={company.logoUrl} progress={userProgress[activeLevel.id]} onBack={() => setActiveLevel(null)} onFinishQuiz={(score, passed) => setGlobalProgress({ ...globalProgress, [userProgressKey]: { ...userProgress, [activeLevel.id]: { score, passed, completedAt: new Date().toISOString() } } })} />;
+  if (activeLevel) return <LevelPlayer level={activeLevel} settings={company.settings} userName={loggedUser.name} companyName={company.name} companyLogo={company.logoUrl} progress={userProgress[activeLevel.id]} onBack={() => setActiveLevel(null)} onFinishQuiz={(score, passed) => onUpdateProgress(userProgressKey, { ...userProgress, [activeLevel.id]: { score, passed, completedAt: new Date().toISOString() } })} />;
 
   return (
     <div className="space-y-6 animate-in fade-in print:hidden">
