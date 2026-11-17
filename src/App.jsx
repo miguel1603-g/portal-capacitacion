@@ -4,13 +4,26 @@ import {
   ChevronRight, Plus, Trash2, Edit, Save, User, 
   PlayCircle, FileText, Printer, ArrowLeft, Lock, ExternalLink,
   Link as LinkIcon, Download, Building, X, Users, UserCheck, UserX, Mail, Key, CreditCard, BarChart,
-  MessageCircle, Clock, AlertTriangle, Upload
+  MessageCircle, Clock, AlertTriangle, Upload, Copy
 } from 'lucide-react';
 
-// --- IMPORTACIONES DE FIREBASE ---
-import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
-import { db } from './firebase';
+// --- CONFIGURACIÓN DE FIREBASE UNIFICADA ---
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 
+const firebaseConfig = {
+  apiKey: "AIzaSyBUEPxmjXb5hqfc8hW0tGO05IFvX8bjgLU",
+  authDomain: "capacitacorp-db.firebaseapp.com",
+  projectId: "capacitacorp-db",
+  storageBucket: "capacitacorp-db.firebasestorage.app",
+  messagingSenderId: "66322810405",
+  appId: "1:66322810405:web:a59bb115aee16b532d61cc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// --- DATOS POR DEFECTO PARA NUEVOS ENTORNOS ---
 const defaultLevels = [
   {
     id: 'lvl-1',
@@ -78,8 +91,8 @@ const defaultCompanies = [
 ];
 
 export default function App() {
-  const [role, setRole] = useState('admin'); // 'admin' | 'learner'
-  const [adminAuth, setAdminAuth] = useState(false); // Estado de sesión del Admin
+  const [role, setRole] = useState('admin');
+  const [adminAuth, setAdminAuth] = useState(false);
   const [companies, setCompanies] = useState([]);
   const [currentCompanyId, setCurrentCompanyId] = useState(null);
   const [dialog, setDialog] = useState(null);
@@ -91,26 +104,34 @@ export default function App() {
 
   // --- CONEXIÓN EN TIEMPO REAL CON FIREBASE ---
   useEffect(() => {
-    const unsubCompanies = onSnapshot(collection(db, 'companies'), (snapshot) => {
-      if (snapshot.empty) {
-        // Si la base de datos está vacía, subimos las empresas de prueba automáticamente
-        defaultCompanies.forEach(async (comp) => {
-          await setDoc(doc(db, 'companies', comp.id), comp);
-        });
-      } else {
-        const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setCompanies(loaded);
-      }
+    try {
+      const unsubCompanies = onSnapshot(collection(db, 'companies'), (snapshot) => {
+        if (snapshot.empty) {
+          defaultCompanies.forEach(async (comp) => {
+            await setDoc(doc(db, 'companies', comp.id), comp);
+          });
+        } else {
+          const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setCompanies(loaded);
+        }
+        setLoadingDb(false);
+      }, (error) => {
+        console.error("Error cargando empresas:", error);
+        setLoadingDb(false);
+      });
+
+      const unsubProgress = onSnapshot(collection(db, 'progress'), (snapshot) => {
+         const prog = {};
+         snapshot.docs.forEach(doc => { prog[doc.id] = doc.data(); });
+         setGlobalProgress(prog);
+      });
+
+      return () => { unsubCompanies(); unsubProgress(); };
+    } catch (err) {
+      console.warn("Ejecutando sin Firebase", err);
+      setCompanies(defaultCompanies);
       setLoadingDb(false);
-    });
-
-    const unsubProgress = onSnapshot(collection(db, 'progress'), (snapshot) => {
-       const prog = {};
-       snapshot.docs.forEach(doc => { prog[doc.id] = doc.data(); });
-       setGlobalProgress(prog);
-    });
-
-    return () => { unsubCompanies(); unsubProgress(); };
+    }
   }, []);
 
   // Escuchar y aplicar el hash (link directo)
@@ -146,18 +167,24 @@ export default function App() {
 
   // --- FUNCIONES PARA GUARDAR EN FIREBASE ---
   const handleUpdateCompany = async (updatedCompany) => {
-    try { await setDoc(doc(db, 'companies', updatedCompany.id), updatedCompany); } 
-    catch (error) { console.error("Error guardando empresa:", error); }
+    try { 
+      if (db) await setDoc(doc(db, 'companies', updatedCompany.id), updatedCompany); 
+      else setCompanies(companies.map(c => c.id === updatedCompany.id ? updatedCompany : c)); // Fallback
+    } catch (error) { console.error("Error guardando empresa:", error); }
   };
 
   const handleDeleteCompany = async (companyId) => {
-    try { await deleteDoc(doc(db, 'companies', companyId)); } 
-    catch (error) { console.error("Error eliminando empresa:", error); }
+    try { 
+      if (db) await deleteDoc(doc(db, 'companies', companyId)); 
+      else setCompanies(companies.filter(c => c.id !== companyId)); // Fallback
+    } catch (error) { console.error("Error eliminando empresa:", error); }
   };
 
   const handleUpdateProgress = async (progKey, newProgressData) => {
-    try { await setDoc(doc(db, 'progress', progKey), newProgressData); } 
-    catch (error) { console.error("Error guardando progreso:", error); }
+    try { 
+      if (db) await setDoc(doc(db, 'progress', progKey), newProgressData); 
+      else setGlobalProgress({...globalProgress, [progKey]: newProgressData}); // Fallback
+    } catch (error) { console.error("Error guardando progreso:", error); }
   };
 
   // PANTALLA DE CARGA
@@ -242,6 +269,10 @@ export default function App() {
   );
 }
 
+// ============================================================================
+// COMPONENTES SECUNDARIOS
+// ============================================================================
+
 function DialogModal({ dialog, closeDialog }) {
   const [inputValue, setInputValue] = useState('');
 
@@ -302,7 +333,6 @@ function AdminLogin({ onLogin }) {
     const email = e.target.email.value;
     const password = e.target.password.value;
     
-    // Validar con las credenciales del Super Administrador
     if (email === 'miguelgurumendi92@gmail.com' && password === 'Lmg54321') {
       onLogin();
     } else {
@@ -336,28 +366,54 @@ function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSe
       placeholder: 'Ej: Empresa S.A.',
       onConfirm: (name) => {
         if (name.trim()) {
-          // Generar enlace corto
-          let words = name.trim().toLowerCase()
-            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/\b(s\.?a\.?|c\.?a\.?|cia|ltda|corp|de|del|la|el|los|las|y)\b/g, '') 
-            .replace(/[^a-z0-9\s]+/g, '')
-            .split(/\s+/).filter(w => w.length > 0);
-          
+          let words = name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(s\.?a\.?|c\.?a\.?|cia|ltda|corp|de|del|la|el|los|las|y)\b/g, '').replace(/[^a-z0-9\s]+/g, '').split(/\s+/).filter(w => w.length > 0);
           let baseSlug = 'emp';
-          if (words.length === 1) {
-            baseSlug = words[0].substring(0, 6);
-          } else if (words.length > 1) {
-            baseSlug = words.map(w => w[0]).join('').substring(0, 4);
-          }
+          if (words.length === 1) baseSlug = words[0].substring(0, 6);
+          else if (words.length > 1) baseSlug = words.map(w => w[0]).join('').substring(0, 4);
           
-          let finalSlug = baseSlug;
-          let counter = 1;
-          while (companies.find(c => c.id === finalSlug)) {
-            finalSlug = `${baseSlug}${counter}`; 
-            counter++;
-          }
+          let finalSlug = baseSlug; let counter = 1;
+          while (companies.find(c => c.id === finalSlug)) { finalSlug = `${baseSlug}${counter}`; counter++; }
 
           onUpdateCompany({ id: finalSlug, name: name.trim(), settings: { maxScore: 100, passingScore: 70 }, levels: [], users: [], pendingRequests: [] });
+        }
+      }
+    });
+  };
+
+  const handleCloneCompany = (companyToClone, e) => {
+    e.stopPropagation();
+    showDialog({
+      type: 'prompt',
+      title: 'Duplicar Empresa',
+      message: `Ingresa el nombre para la nueva empresa.\nSe copiará todo el material de estudio y preguntas de "${companyToClone.name}":`,
+      placeholder: 'Ej: Nuevo Cliente S.A.',
+      onConfirm: (newName) => {
+        if (newName.trim()) {
+          let words = newName.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\b(s\.?a\.?|c\.?a\.?|cia|ltda|corp|de|del|la|el|los|las|y)\b/g, '').replace(/[^a-z0-9\s]+/g, '').split(/\s+/).filter(w => w.length > 0);
+          let baseSlug = 'emp';
+          if (words.length === 1) baseSlug = words[0].substring(0, 6);
+          else if (words.length > 1) baseSlug = words.map(w => w[0]).join('').substring(0, 4);
+          
+          let finalSlug = baseSlug; let counter = 1;
+          while (companies.find(c => c.id === finalSlug)) { finalSlug = `${baseSlug}${counter}`; counter++; }
+
+          // Copiar niveles generando nuevos IDs
+          const clonedLevels = JSON.parse(JSON.stringify(companyToClone.levels)).map(lvl => ({
+            ...lvl,
+            id: `lvl-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`
+          }));
+
+          const newCompany = {
+            id: finalSlug,
+            name: newName.trim(),
+            logoUrl: companyToClone.logoUrl || '', 
+            settings: JSON.parse(JSON.stringify(companyToClone.settings)),
+            levels: clonedLevels,
+            users: [], 
+            pendingRequests: []
+          };
+
+          onUpdateCompany(newCompany);
         }
       }
     });
@@ -373,11 +429,7 @@ function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSe
     } catch (err) {
       link = `https://plataforma-elearning.com/#${id}`;
     }
-    showDialog({
-      type: 'alert',
-      title: 'Enlace Corto Generado',
-      message: `Este es el link directo para los colaboradores:\n\n🔗 ${link}\n\nCódigo de acceso manual: "${id}"`
-    });
+    showDialog({ type: 'alert', title: 'Enlace Corto Generado', message: `Este es el link directo para los colaboradores:\n\n🔗 ${link}\n\nCódigo manual: "${id}"` });
   };
 
   return (
@@ -403,7 +455,7 @@ function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSe
             <div className="p-5 border-b border-slate-100 flex justify-between items-start">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
-                  <Building className="w-6 h-6" />
+                  {company.logoUrl ? <img src={company.logoUrl} className="max-w-full max-h-full rounded" alt="Logo"/> : <Building className="w-6 h-6" />}
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-800 text-lg">{company.name}</h3>
@@ -413,6 +465,9 @@ function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSe
               <div className="flex space-x-1">
                 <button onClick={(e) => copyLink(company.id, e)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition" title="Obtener enlace">
                   <LinkIcon className="w-5 h-5" />
+                </button>
+                <button onClick={(e) => handleCloneCompany(company, e)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Duplicar / Clonar Empresa">
+                  <Copy className="w-5 h-5" />
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); onDeleteCompany(company.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Eliminar">
                   <Trash2 className="w-5 h-5" />
@@ -482,29 +537,6 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
     onUpdateCompany({
       ...company,
       pendingRequests: (company.pendingRequests || []).filter(r => r.id !== id)
-    });
-  };
-
-  const importBank = () => {
-    const otherCompanies = companies.filter(c => c.id !== company.id && c.levels.length > 0);
-    if (otherCompanies.length === 0) {
-      showDialog({ type: 'alert', title: 'Sin bancos', message: 'No hay otras empresas con material para importar.' });
-      return;
-    }
-    let companyListText = otherCompanies.map((c, i) => `${i + 1}. ${c.name} (${c.levels.length} niveles)`).join('\n');
-    showDialog({
-      type: 'prompt',
-      title: 'Importar Banco de Preguntas',
-      message: `Escribe el NÚMERO de la empresa:\n\n${companyListText}`,
-      placeholder: 'Ej: 1',
-      onConfirm: (val) => {
-        const index = parseInt(val) - 1;
-        if (!isNaN(index) && otherCompanies[index]) {
-          const sourceCompany = otherCompanies[index];
-          const copiedLevels = JSON.parse(JSON.stringify(sourceCompany.levels)).map(lvl => ({ ...lvl, id: `lvl-${Date.now()}-${Math.random().toString(36).substr(2, 5)}` }));
-          onUpdateCompany({ ...company, levels: [...company.levels, ...copiedLevels] });
-        }
-      }
     });
   };
 
@@ -629,10 +661,7 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
                   const msg = `Hola ${user.name},\nTe recordamos que tienes módulos pendientes en el portal de ${company.name}. El módulo "${nextPendingLevel.title}" vence el ${nextPendingLevel.deadline || 'pronto'}. Pasada esa fecha se bloqueará tu acceso. Por favor, completa tu evaluación.`;
                   
                   let phone = user.phone.replace(/[^0-9]/g, '');
-                  // Autocompletar código de país de Ecuador si no lo tiene
-                  if (phone.startsWith('09') && phone.length === 10) {
-                      phone = '593' + phone.substring(1);
-                  }
+                  if (phone.startsWith('09') && phone.length === 10) phone = '593' + phone.substring(1);
 
                   const a = document.createElement('a');
                   a.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
@@ -692,8 +721,7 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
           <div className="flex justify-between items-center mb-4 border-b pb-2">
             <h3 className="text-xl font-semibold">Ruta de Aprendizaje</h3>
             <div className="flex space-x-2">
-               <button onClick={importBank} className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg hover:bg-slate-200 text-sm font-medium">Importar Banco</button>
-               <button onClick={addNewLevel} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 text-sm flex items-center space-x-1"><Plus className="w-4 h-4"/> <span>Añadir</span></button>
+               <button onClick={addNewLevel} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 text-sm flex items-center space-x-1"><Plus className="w-4 h-4"/> <span>Añadir Nivel</span></button>
             </div>
           </div>
           <div className="space-y-3">
@@ -983,10 +1011,9 @@ function LevelPlayer({ level, settings, userName, companyName, companyLogo, onBa
     onFinishQuiz(score, score >= settings.passingScore);
   };
 
-  // Gestor inteligente para abrir/descargar el material evadiendo bloqueos de seguridad del navegador
   const handleOpenMaterial = (e, mat) => {
     if (mat.url && mat.url.startsWith('data:')) {
-      e.preventDefault(); // Evitamos que el navegador intente abrir el base64 en pestaña nueva
+      e.preventDefault();
       try {
         fetch(mat.url)
           .then(res => res.blob())
