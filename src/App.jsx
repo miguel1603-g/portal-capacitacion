@@ -192,33 +192,37 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center text-slate-500 animate-pulse">
-          <BookOpen className="w-12 h-12 mx-auto mb-4 text-indigo-300" />
-          <p className="text-xl font-bold">Conectando a la Base de Datos...</p>
+          <BookOpen className="w-12 h-12 mx-auto mb-4 text-indigo-500" />
+          <p className="text-xl font-bold">Cargando Plataforma...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans relative">
-      <header className="bg-indigo-600 text-white p-4 shadow-md print:hidden sticky top-0 z-40">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans relative selection:bg-indigo-100 selection:text-indigo-900">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 sticky top-0 z-40 print:hidden transition-all duration-300">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setCurrentCompanyId(null)}>
-            <BookOpen className="w-6 h-6" />
-            <h1 className="text-xl font-bold hidden sm:block">CapacitaCorp e-Learning</h1>
-            <h1 className="text-xl font-bold sm:hidden">CapacitaCorp</h1>
+          <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => setCurrentCompanyId(null)}>
+            <div className="bg-indigo-600 text-white p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-md shadow-indigo-200">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-700 to-blue-600 hidden sm:block tracking-tight">CapacitaCorp e-Learning</h1>
+              <h1 className="text-xl font-bold text-indigo-700 sm:hidden">CapacitaCorp</h1>
+            </div>
           </div>
           
-          <div className="flex items-center space-x-2 sm:space-x-4 bg-indigo-700 p-1 rounded-lg">
+          <div className="flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/50">
             <button 
               onClick={() => { setRole('learner'); setCurrentCompanyId(null); }}
-              className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${role === 'learner' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${role === 'learner' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
             >
               Colaborador
             </button>
             <button 
               onClick={() => { setRole('admin'); setCurrentCompanyId(null); }}
-              className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors ${role === 'admin' ? 'bg-white text-indigo-700' : 'text-indigo-100 hover:text-white'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${role === 'admin' ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
             >
               Admin
             </button>
@@ -226,7 +230,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-4 md:p-6 pb-20">
+      <main className="max-w-6xl mx-auto p-4 md:p-8 pb-24">
         {role === 'admin' ? (
           !adminAuth ? (
             <AdminLogin onLogin={() => setAdminAuth(true)} />
@@ -433,54 +437,69 @@ function AdminPortalSelector({ companies, onUpdateCompany, onDeleteCompany, onSe
   };
 
   return (
-    <div className="animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-        <div>
-          <h2 className="text-3xl font-bold text-slate-800">Ambientes de Capacitación</h2>
-          <p className="text-slate-500 mt-1">Gestiona los portales e-learning de cada empresa.</p>
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header unificado y premium */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-60"></div>
+        <div className="relative z-10">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight">Ambientes de Capacitación</h2>
+          <p className="text-slate-500 mt-2 font-medium">Gestiona los portales e-learning de cada empresa o cliente.</p>
         </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
-          <button onClick={handleAddCompany} className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 shadow-sm">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <button onClick={handleAddCompany} className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-indigo-600 text-white px-6 py-3.5 rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all hover:-translate-y-0.5 font-bold text-sm">
             <Plus className="w-5 h-5" /> <span>Crear Empresa</span>
           </button>
-          <button onClick={onLogout} className="text-sm font-medium text-slate-600 hover:text-red-600 bg-white border border-slate-200 hover:border-red-200 hover:bg-red-50 px-4 py-2.5 rounded-lg transition-colors">
+          <button onClick={onLogout} className="w-full sm:w-auto flex items-center justify-center text-sm font-bold text-slate-500 hover:text-rose-600 bg-slate-50 border border-slate-200 hover:border-rose-200 hover:bg-rose-50 px-6 py-3.5 rounded-xl transition-colors">
             Cerrar sesión
           </button>
         </div>
       </div>
 
+      {/* Grid de Tarjetas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {companies.map(company => (
-          <div key={company.id} onClick={() => onSelectCompany(company.id)} className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition cursor-pointer group flex flex-col">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-start">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
-                  {company.logoUrl ? <img src={company.logoUrl} className="max-w-full max-h-full rounded" alt="Logo"/> : <Building className="w-6 h-6" />}
+          <div key={company.id} onClick={() => onSelectCompany(company.id)} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-xl hover:-translate-y-1 hover:border-indigo-200 transition-all duration-300 cursor-pointer group flex flex-col overflow-hidden relative">
+            
+            {/* Overlay de Acciones (Esquina superior derecha) */}
+            <div className="absolute top-4 right-4 flex gap-1.5 z-20">
+              <button onClick={(e) => copyLink(company.id, e)} className="p-2.5 bg-white/90 backdrop-blur-sm text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-100 shadow-sm rounded-xl transition-colors" title="Copiar enlace directo">
+                <LinkIcon className="w-4 h-4" />
+              </button>
+              <button onClick={(e) => handleCloneCompany(company, e)} className="p-2.5 bg-white/90 backdrop-blur-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-slate-100 shadow-sm rounded-xl transition-colors opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0" title="Duplicar Empresa">
+                <Copy className="w-4 h-4" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); onDeleteCompany(company.id); }} className="p-2.5 bg-white/90 backdrop-blur-sm text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-100 shadow-sm rounded-xl transition-colors opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0" title="Eliminar Portal">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Contenido Principal */}
+            <div className="p-6 md:p-8 flex-1">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 text-indigo-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                {company.logoUrl ? <img src={company.logoUrl} className="w-full h-full object-contain p-2 rounded-2xl" alt="Logo"/> : <Building className="w-8 h-8" />}
+              </div>
+              
+              <div className="mb-8">
+                <h3 className="font-extrabold text-slate-800 text-xl md:text-2xl tracking-tight mb-2 line-clamp-1">{company.name}</h3>
+                <span className="inline-block bg-slate-100 text-slate-500 font-mono text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-md">ID: {company.id}</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                <div>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><Users className="w-3.5 h-3.5"/> Usuarios</p>
+                  <p className="font-black text-2xl text-slate-700">{(company.users || []).length}</p>
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 text-lg">{company.name}</h3>
-                  <p className="text-xs text-slate-400 font-mono">ID: {company.id}</p>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5"/> Módulos</p>
+                  <p className="font-black text-2xl text-slate-700">{(company.levels || []).length}</p>
                 </div>
               </div>
-              <div className="flex space-x-1">
-                <button onClick={(e) => copyLink(company.id, e)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition" title="Obtener enlace">
-                  <LinkIcon className="w-5 h-5" />
-                </button>
-                <button onClick={(e) => handleCloneCompany(company, e)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Duplicar / Clonar Empresa">
-                  <Copy className="w-5 h-5" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); onDeleteCompany(company.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition opacity-0 group-hover:opacity-100" title="Eliminar">
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
             </div>
-            <div className="p-5 bg-slate-50 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-slate-500">Usuarios Registrados</span>
-                <span className="font-semibold text-slate-800 bg-white px-2 py-1 rounded border border-slate-200">{(company.users || []).length}</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2 text-indigo-600 font-medium text-sm mt-auto group-hover:translate-x-1 transition-transform">
-                <span>Configurar Portal</span> <ChevronRight className="w-4 h-4" />
+            
+            {/* Pie de Tarjeta Interactivo */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 group-hover:bg-indigo-600 transition-colors duration-300">
+              <div className="flex items-center justify-center space-x-2 text-indigo-600 group-hover:text-white font-bold text-sm transition-colors">
+                <span>Configurar Portal</span> <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
@@ -579,71 +598,106 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
 
   if (editingLevel) return <LevelEditor level={editingLevel} onSave={saveLevel} onCancel={() => setEditingLevel(null)} />;
 
+  const totalUsers = (company.users || []).length;
+  const totalPending = (company.pendingRequests || []).length;
+  const totalLevels = company.levels.length;
+
   return (
     <div className="space-y-6 animate-in fade-in zoom-in duration-300">
-      <div className="flex items-center space-x-3 mb-6">
-        <button onClick={onBack} className="p-2 bg-white rounded-md border border-slate-200 hover:bg-slate-50 text-slate-500"><ArrowLeft className="w-5 h-5" /></button>
-        <div className="relative group">
-          <label className="cursor-pointer block relative" title="Subir o cambiar Logo de la Empresa">
-            {company.logoUrl ? (
-              <img src={company.logoUrl} alt="Logo" className="w-14 h-14 object-contain bg-white rounded-lg border border-slate-200 p-1 shadow-sm" />
-            ) : (
-              <div className="w-14 h-14 bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 shadow-sm">
-                <Building className="w-8 h-8" />
+      {/* Header Admin */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-100 shadow-sm relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="absolute -right-10 -top-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-60"></div>
+        <div className="flex items-center gap-5 relative z-10">
+          <button onClick={onBack} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 hover:text-indigo-600 text-slate-500 transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="relative group cursor-pointer" title="Subir o cambiar Logo">
+            <label className="cursor-pointer block relative">
+              {company.logoUrl ? (
+                <img src={company.logoUrl} alt="Logo" className="w-16 h-16 object-contain bg-white rounded-2xl border border-slate-100 p-1.5 shadow-sm" />
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm">
+                  <Building className="w-8 h-8" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Upload className="w-6 h-6 text-white" />
               </div>
-            )}
-            <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Upload className="w-6 h-6 text-white" />
-            </div>
-            <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
-          </label>
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+            </label>
+          </div>
+          <div>
+            <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{company.name}</h2>
+            <p className="text-indigo-600 font-semibold text-sm uppercase tracking-wider">Panel de Administración</p>
+          </div>
         </div>
-        <h2 className="text-3xl font-bold text-slate-800">{company.name} <span className="text-lg font-normal text-slate-500 ml-2 hidden sm:inline">Panel Admin</span></h2>
       </div>
 
-      <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm mb-6">
-        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-          <Users className="w-5 h-5 mr-2 text-orange-500" /> Solicitudes de Acceso Pendientes ({(company.pendingRequests || []).length})
-        </h3>
-        {(!company.pendingRequests || company.pendingRequests.length === 0) ? (
-          <p className="text-slate-500 text-sm bg-slate-50 p-4 rounded-lg border border-dashed border-slate-200 text-center">No hay solicitudes de acceso pendientes por revisar.</p>
-        ) : (
-          <div className="space-y-3">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><Users className="w-6 h-6" /></div>
+          <div><p className="text-slate-500 text-sm font-medium">Colaboradores</p><p className="text-2xl font-bold text-slate-800">{totalUsers}</p></div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-4 bg-orange-50 text-orange-600 rounded-2xl"><UserCheck className="w-6 h-6" /></div>
+          <div><p className="text-slate-500 text-sm font-medium">Solicitudes Pendientes</p><p className="text-2xl font-bold text-slate-800">{totalPending}</p></div>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+          <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl"><BookOpen className="w-6 h-6" /></div>
+          <div><p className="text-slate-500 text-sm font-medium">Módulos Activos</p><p className="text-2xl font-bold text-slate-800">{totalLevels}</p></div>
+        </div>
+      </div>
+
+      {/* Pending Requests Alert */}
+      {totalPending > 0 && (
+        <div className="bg-orange-50 border border-orange-200 p-6 rounded-2xl shadow-sm">
+          <h3 className="text-lg font-bold text-orange-800 mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" /> Tienes solicitudes de acceso por revisar
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {company.pendingRequests.map(req => (
-              <div key={req.id} className="bg-orange-50 p-4 rounded-lg border border-orange-100 flex flex-col sm:flex-row justify-between sm:items-center">
-                <div>
-                  <p className="font-bold text-slate-800 flex items-center"><User className="w-4 h-4 mr-1 text-slate-400"/>{req.name}</p>
-                  <p className="text-sm text-slate-500 mt-1">C.I: {req.cedula} | Tel: {req.phone}</p>
-                  <p className="text-sm text-slate-500">{req.email}</p>
+              <div key={req.id} className="bg-white p-4 rounded-xl border border-orange-100 flex flex-col justify-between shadow-sm">
+                <div className="mb-4">
+                  <p className="font-bold text-slate-800 flex items-center gap-2"><User className="w-4 h-4 text-slate-400"/>{req.name}</p>
+                  <div className="text-sm text-slate-500 mt-2 grid grid-cols-2 gap-y-1">
+                    <span><span className="font-medium">C.I:</span> {req.cedula}</span>
+                    <span><span className="font-medium">Tel:</span> {req.phone}</span>
+                    <span className="col-span-2"><span className="font-medium">Email:</span> {req.email}</span>
+                  </div>
                 </div>
-                <div className="flex space-x-2 mt-3 sm:mt-0">
-                  <button onClick={() => approveRequest(req)} className="flex items-center px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-sm font-bold transition">
+                <div className="flex gap-2">
+                  <button onClick={() => approveRequest(req)} className="flex-1 flex justify-center items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition-colors">
                     <UserCheck className="w-4 h-4 mr-1"/> Permitir
                   </button>
-                  <button onClick={() => rejectRequest(req.id)} className="flex items-center px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-sm font-bold transition">
+                  <button onClick={() => rejectRequest(req.id)} className="flex-1 flex justify-center items-center px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-sm font-bold transition-colors">
                     <UserX className="w-4 h-4 mr-1"/> Rechazar
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col">
-          <div className="flex justify-between items-center mb-4 border-b pb-2 gap-3">
-            <h3 className="text-xl font-semibold flex items-center space-x-2">
-              <BarChart className="w-5 h-5 text-slate-400" /> <span>Colaboradores</span>
+        {/* Colaboradores List */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col h-[600px]">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-500" /> Colaboradores
             </h3>
-            <button onClick={handleDownloadReport} className="flex items-center space-x-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition text-sm font-medium">
-              <Download className="w-4 h-4" /> <span>Descargar CSV</span>
+            <button onClick={handleDownloadReport} className="flex items-center gap-2 bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2 rounded-xl hover:bg-slate-100 hover:text-indigo-600 transition-colors text-sm font-bold shadow-sm">
+              <Download className="w-4 h-4" /> Exportar CSV
             </button>
           </div>
           
-          <div className="space-y-4 flex-1 overflow-y-auto">
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {(!company.users || company.users.length === 0) ? (
-              <p className="text-center text-slate-500 py-6 bg-slate-50 rounded-lg border border-dashed border-slate-200">No hay colaboradores activos.</p>
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <Users className="w-12 h-12 mb-2 opacity-50" />
+                <p>No hay colaboradores activos.</p>
+              </div>
             ) : (
               company.users.map(user => {
                 const userProg = globalProgress ? (globalProgress[`${company.id}_${user.id}`] || {}) : {};
@@ -654,6 +708,8 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
                   if (userProg[lvl.id]?.passed) passedCount++; 
                   else if (!nextPendingLevel) nextPendingLevel = lvl;
                 });
+
+                const progressPct = totalLevels > 0 ? Math.round((passedCount / totalLevels) * 100) : 0;
 
                 const handleSendWA = () => {
                   if (!user.phone) { showDialog({type:'alert', title:'Error', message:'El usuario no tiene número registrado.'}); return; }
@@ -679,32 +735,41 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
                 };
 
                 return (
-                  <div key={user.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-indigo-200 transition">
-                    <div className="flex justify-between mb-3 border-b border-slate-100 pb-3">
-                      <div>
-                        <h4 className="font-bold text-slate-800">{user.name}</h4>
-                        <div className="text-xs text-slate-500 mt-1">{user.email} | {user.phone || 'Sin tel'}</div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-right mr-2">
-                          <p className="text-xs text-slate-400 font-semibold">Progreso</p>
-                          <p className="font-bold text-indigo-700">{passedCount}/{company.levels.length}</p>
+                  <div key={user.id} className="p-4 bg-white rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex gap-3 items-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                          {user.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}
                         </div>
-                        <button onClick={handleSendWA} className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded" title="Notificar por WhatsApp"><MessageCircle className="w-4 h-4" /></button>
-                        <button onClick={handleSendEmail} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Notificar por Correo"><Mail className="w-4 h-4" /></button>
+                        <div>
+                          <h4 className="font-bold text-slate-800 leading-tight">{user.name}</h4>
+                          <div className="text-xs text-slate-500 mt-0.5">{user.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={handleSendWA} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg" title="Notificar por WhatsApp"><MessageCircle className="w-4 h-4" /></button>
+                        <button onClick={handleSendEmail} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg" title="Notificar por Correo"><Mail className="w-4 h-4" /></button>
                         <button onClick={() => {
                           showDialog({ type: 'confirm', title: 'Revocar Acceso', message: '¿Eliminar acceso a este usuario?', onConfirm: () => onUpdateCompany({ ...company, users: company.users.filter(u => u.id !== user.id) }) });
-                        }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded" title="Eliminar Acceso"><Trash2 className="w-4 h-4" /></button>
+                        }} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg" title="Eliminar Acceso"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </div>
+                    
+                    {/* User Progress Bar */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
+                         <div className="bg-indigo-500 h-full rounded-full" style={{width: `${progressPct}%`}}></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-600">{passedCount}/{totalLevels}</span>
+                    </div>
+
                     {company.levels.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="flex gap-2 mt-3 overflow-x-auto pb-1 custom-scrollbar">
                         {company.levels.map((lvl, i) => {
                           const lvlStatus = userProg[lvl.id];
                           return (
-                            <div key={lvl.id} className="text-xs p-1.5 rounded bg-white border border-slate-200 flex justify-between shadow-sm">
-                              <span className="truncate mr-1">N{i+1}</span>
-                              {lvlStatus ? <span className={`font-bold ${lvlStatus.passed ? 'text-green-600' : 'text-red-600'}`}>{lvlStatus.score} {lvlStatus.passed ? '✅' : '❌'}</span> : <span className="text-slate-400">Pendiente</span>}
+                            <div key={lvl.id} className={`flex-shrink-0 text-[10px] px-2 py-1 rounded-md border font-bold ${lvlStatus?.passed ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : lvlStatus ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-50 text-slate-400 border-slate-100'}`} title={lvl.title}>
+                              M{i+1}: {lvlStatus ? lvlStatus.score : '-'}
                             </div>
                           );
                         })}
@@ -717,26 +782,41 @@ function AdminDashboard({ company, onUpdateCompany, onBack, companies, showDialo
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex justify-between items-center mb-4 border-b pb-2">
-            <h3 className="text-xl font-semibold">Ruta de Aprendizaje</h3>
-            <div className="flex space-x-2">
-               <button onClick={addNewLevel} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 text-sm flex items-center space-x-1"><Plus className="w-4 h-4"/> <span>Añadir Nivel</span></button>
-            </div>
+        {/* Learning Path */}
+        <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col h-[600px]">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Award className="w-5 h-5 text-indigo-500" /> Ruta de Aprendizaje
+            </h3>
+            <button onClick={addNewLevel} className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 hover:shadow-md transition-all text-sm font-bold flex items-center gap-2">
+              <Plus className="w-4 h-4"/> Añadir Módulo
+            </button>
           </div>
-          <div className="space-y-3">
+          
+          <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar relative before:absolute before:inset-y-0 before:left-6 before:w-0.5 before:bg-slate-100">
             {company.levels.length === 0 ? (
-              <p className="text-center text-slate-500 py-10 bg-slate-50 border-dashed border">No hay niveles.</p>
+              <div className="flex flex-col items-center justify-center h-full text-slate-400 relative z-10 bg-white">
+                <BookOpen className="w-12 h-12 mb-2 opacity-50" />
+                <p>No has creado ningún módulo aún.</p>
+              </div>
             ) : (
               company.levels.map((lvl, index) => (
-                <div key={lvl.id} className="flex justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-indigo-100 text-indigo-700 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">{index + 1}</div>
-                    <div><h4 className="font-semibold">{lvl.title}</h4><p className="text-xs text-slate-500">{lvl.questions?.length || 0} Preguntas</p></div>
+                <div key={lvl.id} className="relative z-10 flex items-start gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white border-2 border-indigo-100 text-indigo-600 flex items-center justify-center font-bold shadow-sm flex-shrink-0 group-hover:border-indigo-500 group-hover:bg-indigo-50 transition-colors">
+                    {index + 1}
                   </div>
-                  <div className="flex space-x-2">
-                    <button onClick={() => setEditingLevel(lvl)} className="p-2 text-blue-600 bg-blue-50 rounded-md"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => deleteLevel(lvl.id)} className="p-2 text-red-600 bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                  <div className="flex-1 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md group-hover:border-indigo-100 transition-all flex justify-between items-center">
+                    <div>
+                      <h4 className="font-bold text-slate-800">{lvl.title}</h4>
+                      <p className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                        <span><FileText className="w-3 h-3 inline mr-1" /> {(lvl.materials || []).length} Recursos</span>
+                        <span><Award className="w-3 h-3 inline mr-1" /> {(lvl.questions || []).length} Preguntas</span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditingLevel(lvl)} className="p-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => deleteLevel(lvl.id)} className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -879,14 +959,16 @@ function LearnerGateway({ companies, onEnterCode }) {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center animate-in fade-in zoom-in">
-      <Lock className="w-16 h-16 text-indigo-500 mx-auto mb-4" />
-      <h2 className="text-2xl font-bold mb-2">Portal de Capacitación</h2>
-      <p className="text-slate-500 mb-6 text-sm">Necesitas el <strong>enlace directo</strong> o ingresar el código corto.</p>
+    <div className="max-w-md mx-auto mt-20 bg-white p-10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center animate-in fade-in zoom-in duration-500">
+      <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+        <Lock className="w-10 h-10 text-indigo-500" />
+      </div>
+      <h2 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">Acceso a Capacitación</h2>
+      <p className="text-slate-500 mb-8 text-sm leading-relaxed">Ingresa el código corto proporcionado por tu empresa o pega el enlace directo para continuar.</p>
       <form onSubmit={handleSubmit}>
-        <input type="text" value={code} onChange={e => { setCode(e.target.value); setError(''); }} placeholder="Código o Enlace" className="w-full p-3 border rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 text-center" />
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-        <button type="submit" className="w-full bg-slate-800 text-white py-3 rounded-lg font-bold">Ingresar</button>
+        <input type="text" value={code} onChange={e => { setCode(e.target.value); setError(''); }} placeholder="Ej: emp1 o enlace" className="w-full p-4 border border-slate-200 rounded-xl mb-4 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 text-center text-lg font-medium transition-all" />
+        {error && <p className="text-red-500 text-sm mb-4 font-medium animate-in slide-in-from-top-1">{error}</p>}
+        <button type="submit" className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-4 rounded-xl font-bold shadow-md shadow-indigo-200 hover:shadow-lg hover:shadow-indigo-300 transition-all hover:-translate-y-0.5">Ingresar al Portal</button>
       </form>
     </div>
   );
@@ -959,39 +1041,127 @@ function LearnerDashboard({ company, onUpdateCompany, globalProgress, onUpdatePr
 
   if (activeLevel) return <LevelPlayer level={activeLevel} settings={company.settings} userName={loggedUser.name} companyName={company.name} companyLogo={company.logoUrl} progress={userProgress[activeLevel.id]} onBack={() => setActiveLevel(null)} onFinishQuiz={(score, passed) => onUpdateProgress(userProgressKey, { ...userProgress, [activeLevel.id]: { score, passed, completedAt: new Date().toISOString() } })} />;
 
-  return (
-    <div className="space-y-6 animate-in fade-in print:hidden">
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl border shadow-sm">
-         <div className="flex items-center space-x-3"><Building className="w-6 h-6 text-indigo-600"/><div><h2 className="font-bold">{company.name}</h2><p className="text-xs text-slate-500">Hola, {loggedUser.name}</p></div></div>
-         <button onClick={() => setLoggedUser(null)} className="text-sm text-slate-500 hover:text-indigo-600 font-medium">Cerrar sesión</button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {company.levels.map((lvl, index) => {
-          const status = userProgress[lvl.id];
-          const isLockedByPrev = index > 0 && !userProgress[company.levels[index - 1].id]?.passed;
-          
-          const todayStr = new Date().toISOString().split('T')[0];
-          const isExpired = lvl.deadline && !status?.passed && todayStr > lvl.deadline;
-          const isLocked = isLockedByPrev || isExpired;
+  // Calcular progreso total
+  const passedLevelsCount = company.levels.filter(lvl => userProgress[lvl.id]?.passed).length;
+  const totalLevels = company.levels.length;
+  const progressPercentage = totalLevels > 0 ? Math.round((passedLevelsCount / totalLevels) * 100) : 0;
 
-          return (
-            <div key={lvl.id} className={`bg-white rounded-xl border relative flex flex-col shadow-sm ${isLocked ? 'border-slate-200 opacity-80' : ''}`}>
-              {isLockedByPrev && <div className="absolute inset-0 bg-slate-50/90 z-10 flex flex-col items-center justify-center rounded-xl"><Lock className="w-6 h-6 text-slate-400 mb-2" /><span className="text-sm font-medium text-slate-500">Nivel Bloqueado</span><span className="text-xs text-slate-400 mt-1">Aprueba el anterior</span></div>}
-              {isExpired && !isLockedByPrev && <div className="absolute inset-0 bg-red-50/95 z-10 flex flex-col items-center justify-center rounded-xl border border-red-200 backdrop-blur-[1px]"><AlertTriangle className="w-8 h-8 text-red-500 mb-2" /><span className="text-sm font-bold text-red-600">Módulo Expirado</span><span className="text-xs text-slate-500 mt-1 px-4 text-center">La fecha límite para aprobar fue el {lvl.deadline}. Contacta a RRHH.</span></div>}
-              
-              <div className={`p-4 border-b ${status?.passed ? 'bg-green-50' : status ? 'bg-red-50' : 'bg-slate-50'}`}>
-                <h3 className="font-bold pr-6">{lvl.title}</h3>
-                {lvl.deadline && !status?.passed && <p className={`text-xs font-semibold mt-2 flex items-center ${isExpired ? 'text-red-500' : 'text-orange-600'}`}><Clock className="w-3 h-3 mr-1"/> Límite: {lvl.deadline}</p>}
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 print:hidden">
+      
+      {/* Hero Section / Resumen de Progreso */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-60"></div>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="flex items-center gap-5">
+            {company.logoUrl ? (
+              <img src={company.logoUrl} alt="Logo" className="w-16 h-16 object-contain bg-white rounded-2xl border border-slate-100 p-2 shadow-sm" />
+            ) : (
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center text-white shadow-md">
+                <Building className="w-8 h-8" />
               </div>
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div className="mb-4">
-                  {status ? <p className="font-bold text-lg">{status.score}/{company.settings.maxScore} {status.passed ? '✅' : '❌'}</p> : <p className="text-sm text-slate-500">Mínimo: {company.settings.passingScore}</p>}
-                </div>
-                <button onClick={() => setActiveLevel(lvl)} disabled={isLocked} className="w-full py-2 bg-indigo-600 text-white rounded-lg font-bold">Comenzar</button>
-              </div>
+            )}
+            <div>
+              <p className="text-sm font-semibold text-indigo-600 tracking-wide uppercase mb-1">{company.name}</p>
+              <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Hola, {loggedUser.name.split(' ')[0]}</h2>
+              <p className="text-slate-500 mt-1">Continúa tu camino de aprendizaje hoy.</p>
             </div>
-          );
-        })}
+          </div>
+          
+          <div className="w-full md:w-auto bg-slate-50 border border-slate-100 p-5 rounded-2xl flex items-center gap-5">
+            <div className="relative w-16 h-16 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-200" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-indigo-600 transition-all duration-1000 ease-out" strokeDasharray={`${progressPercentage}, 100`} strokeWidth="3" stroke="currentColor" fill="none" strokeLinecap="round" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <span className="absolute text-sm font-bold text-slate-700">{progressPercentage}%</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-800">Progreso General</p>
+              <p className="text-xs text-slate-500">{passedLevelsCount} de {totalLevels} módulos completados</p>
+            </div>
+          </div>
+        </div>
+        <button onClick={() => setLoggedUser(null)} className="absolute top-6 right-6 text-sm text-slate-400 hover:text-red-500 font-medium transition-colors flex items-center gap-1">
+          Cerrar sesión
+        </button>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-indigo-500" /> Ruta de Aprendizaje
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {company.levels.map((lvl, index) => {
+            const status = userProgress[lvl.id];
+            const isLockedByPrev = index > 0 && !userProgress[company.levels[index - 1].id]?.passed;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isExpired = lvl.deadline && !status?.passed && todayStr > lvl.deadline;
+            const isLocked = isLockedByPrev || isExpired;
+
+            return (
+              <div key={lvl.id} className={`group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 relative flex flex-col overflow-hidden ${isLocked ? 'opacity-80' : 'hover:-translate-y-1 hover:border-indigo-100'}`}>
+                
+                {/* Overlays */}
+                {isLockedByPrev && (
+                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center rounded-3xl">
+                    <div className="bg-white p-4 rounded-full shadow-md mb-3"><Lock className="w-6 h-6 text-slate-400" /></div>
+                    <span className="text-sm font-bold text-slate-600">Módulo Bloqueado</span>
+                    <span className="text-xs text-slate-500 mt-1 font-medium bg-white/80 px-3 py-1 rounded-full">Aprueba el nivel anterior</span>
+                  </div>
+                )}
+                {isExpired && !isLockedByPrev && (
+                  <div className="absolute inset-0 bg-red-50/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl border border-red-100">
+                    <div className="bg-white p-4 rounded-full shadow-sm mb-3"><AlertTriangle className="w-8 h-8 text-red-500" /></div>
+                    <span className="text-sm font-bold text-red-600">Módulo Expirado</span>
+                    <span className="text-xs text-slate-600 mt-1 px-6 text-center font-medium">La fecha límite fue el {lvl.deadline}. Contacta a RRHH.</span>
+                  </div>
+                )}
+                
+                {/* Card Header */}
+                <div className={`p-6 border-b border-slate-50 ${status?.passed ? 'bg-gradient-to-br from-emerald-50 to-white' : status ? 'bg-gradient-to-br from-red-50 to-white' : 'bg-gradient-to-br from-slate-50 to-white'}`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full border ${status?.passed ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : status ? 'bg-red-100 text-red-700 border-red-200' : 'bg-indigo-50 text-indigo-600 border-indigo-100'}`}>
+                      Módulo {index + 1}
+                    </span>
+                    {status?.passed && <CheckCircle className="w-5 h-5 text-emerald-500" />}
+                    {status && !status.passed && <XCircle className="w-5 h-5 text-red-400" />}
+                  </div>
+                  <h3 className="font-bold text-lg text-slate-800 leading-tight mb-2 pr-4">{lvl.title}</h3>
+                  {lvl.deadline && !status?.passed && (
+                    <p className={`text-xs font-semibold flex items-center ${isExpired ? 'text-red-500' : 'text-orange-500'}`}>
+                      <Clock className="w-3.5 h-3.5 mr-1.5"/> Límite: {new Date(lvl.deadline).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+
+                {/* Card Body */}
+                <div className="p-6 flex-1 flex flex-col justify-end bg-white">
+                  <div className="mb-6 flex justify-between items-end">
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Calificación</p>
+                      {status ? (
+                        <p className={`font-black text-2xl ${status.passed ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {status.score} <span className="text-sm font-medium text-slate-400">/ {company.settings.maxScore}</span>
+                        </p>
+                      ) : (
+                        <p className="text-sm font-semibold text-slate-600">Min. {company.settings.passingScore} pts</p>
+                      )}
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setActiveLevel(lvl)} 
+                    disabled={isLocked} 
+                    className={`w-full py-3.5 rounded-xl font-bold transition-all ${status?.passed ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200 hover:shadow-lg'}`}
+                  >
+                    {status?.passed ? 'Repasar Material' : status ? 'Reintentar Módulo' : 'Comenzar Ahora'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -1033,86 +1203,181 @@ function LevelPlayer({ level, settings, userName, companyName, companyLogo, onBa
     }
   };
 
+  const answeredCount = Object.keys(answers).length;
+  const totalQs = level.questions.length;
+  const progressPct = totalQs > 0 ? Math.round((answeredCount / totalQs) * 100) : 0;
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-4 print:hidden"><button onClick={onBack} className="flex items-center space-x-2 text-indigo-600 font-medium bg-white px-3 py-2 rounded-lg border text-sm"><ArrowLeft className="w-4 h-4" /> <span>Volver</span></button></div>
+    <div className="max-w-3xl mx-auto pb-12">
+      <div className="mb-6 print:hidden">
+        <button onClick={onBack} className="flex items-center space-x-2 text-slate-500 hover:text-indigo-600 font-bold bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm transition-colors text-sm">
+          <ArrowLeft className="w-4 h-4" /> <span>Volver a la ruta</span>
+        </button>
+      </div>
+
       {view === 'material' && (
-        <div className="bg-white p-8 rounded-xl shadow border animate-in slide-in-from-right-8 print:hidden">
-          <h2 className="text-3xl font-bold mb-6">{level.title}</h2>
-          <div className="prose max-w-none mb-10 whitespace-pre-wrap">{level.content}</div>
-          {level.materials?.length > 0 && (
-            <div className="mb-10 p-5 bg-indigo-50 rounded-xl">
-              <h3 className="font-bold text-indigo-900 mb-4">Material Extra</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {level.materials.map(mat => (
-                  <a 
-                    key={mat.id} 
-                    href={mat.url} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    onClick={(e) => handleOpenMaterial(e, mat)}
-                    className="flex items-center p-3 bg-white rounded border hover:border-indigo-400 hover:shadow-sm transition cursor-pointer"
-                  >
-                    {mat.type === 'pdf' ? <FileText className="w-6 h-6 text-red-500 mr-3 flex-shrink-0"/> : 
-                     mat.type === 'video' ? <PlayCircle className="w-6 h-6 text-orange-500 mr-3 flex-shrink-0"/> : 
-                     <ExternalLink className="w-6 h-6 text-blue-500 mr-3 flex-shrink-0"/>}
-                    <div className="overflow-hidden">
-                      <span className="font-bold text-slate-800 text-sm truncate block">{mat.title || 'Ver material'}</span>
-                      <span className="text-xs text-slate-500">{mat.url.startsWith('data:') ? 'Clic para descargar PDF' : 'Clic para abrir enlace'}</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
+        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 animate-in slide-in-from-bottom-4 duration-500 print:hidden relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-0"></div>
+          
+          <div className="relative z-10">
+            <span className="text-indigo-600 font-bold text-sm tracking-widest uppercase mb-2 block">Material de Estudio</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 mb-8 leading-tight">{level.title}</h2>
+            
+            <div className="prose prose-slate prose-lg max-w-none mb-12 whitespace-pre-wrap text-slate-600 leading-relaxed">
+              {level.content}
             </div>
-          )}
-          <div className="flex justify-end pt-6 border-t gap-3">
-             {progress?.passed && <button onClick={() => setView('certificate')} className="px-6 py-3 bg-green-50 text-green-700 font-bold rounded-lg border">Ver Certificado</button>}
-             <button onClick={() => { setAnswers({}); setQuizSubmitted(false); setView('quiz'); }} className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg">{progress?.passed ? 'Rehacer Prueba' : 'Tomar Prueba'}</button>
+
+            {level.materials?.length > 0 && (
+              <div className="mb-12 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-500" /> Recursos Adicionales
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {level.materials.map(mat => (
+                    <a 
+                      key={mat.id} 
+                      href={mat.url} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      onClick={(e) => handleOpenMaterial(e, mat)}
+                      className="group flex items-center p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
+                    >
+                      <div className="p-3 bg-slate-50 rounded-lg group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors mr-4 flex-shrink-0">
+                        {mat.type === 'pdf' ? <FileText className="w-6 h-6 text-rose-500 group-hover:text-rose-600"/> : 
+                         mat.type === 'video' ? <PlayCircle className="w-6 h-6 text-amber-500 group-hover:text-amber-600"/> : 
+                         <ExternalLink className="w-6 h-6 text-blue-500 group-hover:text-blue-600"/>}
+                      </div>
+                      <div className="overflow-hidden">
+                        <span className="font-bold text-slate-700 text-sm truncate block group-hover:text-indigo-700 transition-colors">{mat.title || 'Ver material'}</span>
+                        <span className="text-xs text-slate-400 font-medium mt-0.5 block">{mat.type === 'pdf' && mat.url.startsWith('data:') ? 'Descargar documento' : 'Abrir en nueva pestaña'}</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row justify-end pt-8 border-t border-slate-100 gap-4 mt-8">
+               {progress?.passed && (
+                 <button onClick={() => setView('certificate')} className="px-8 py-3.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2">
+                   <Award className="w-5 h-5"/> Ver Certificado
+                 </button>
+               )}
+               <button onClick={() => { setAnswers({}); setQuizSubmitted(false); setView('quiz'); }} className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-200 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                 {progress?.passed ? 'Repetir Evaluación' : 'Iniciar Evaluación'} <ChevronRight className="w-5 h-5" />
+               </button>
+            </div>
           </div>
         </div>
       )}
+      
       {view === 'quiz' && !quizSubmitted && (
-        <div className="bg-white p-8 rounded-xl shadow border animate-in slide-in-from-right-8 print:hidden">
-          <div className="mb-6 border-b pb-4">
-            <h2 className="text-2xl font-bold mb-2">Evaluación: {level.title}</h2>
-            <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-lg text-indigo-800 text-sm">
-              <p className="font-medium mb-1">
-                Esta evaluación se califica sobre <strong>{settings.maxScore} puntos</strong>.
-              </p>
-              <p>
-                {level.questions.length > 0 && `Consta de ${level.questions.length} preguntas en total. Cada respuesta correcta suma ${(settings.maxScore / level.questions.length).toFixed(2).replace(/\.00$/, '')} puntos.`}
-              </p>
-              <p className="mt-1 font-bold">Puntaje mínimo requerido para aprobar: {settings.passingScore} puntos.</p>
+        <div className="bg-white p-8 md:p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 animate-in slide-in-from-right-8 duration-300 print:hidden relative overflow-hidden">
+          {/* Progress Bar Top */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100">
+            <div className="h-full bg-indigo-600 transition-all duration-500 ease-out" style={{width: `${progressPct}%`}}></div>
+          </div>
+
+          <div className="mb-10 text-center mt-4">
+            <span className="text-indigo-600 font-bold text-sm tracking-widest uppercase mb-2 block">Evaluación de Conocimientos</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-6">{level.title}</h2>
+            
+            <div className="inline-flex flex-wrap justify-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm">
+              <div className="flex items-center gap-2 text-slate-600"><Award className="w-4 h-4 text-indigo-500"/> Max: <strong>{settings.maxScore} pts</strong></div>
+              <div className="w-px h-5 bg-slate-300 hidden sm:block"></div>
+              <div className="flex items-center gap-2 text-slate-600"><CheckCircle className="w-4 h-4 text-emerald-500"/> Min. para aprobar: <strong>{settings.passingScore} pts</strong></div>
+              <div className="w-px h-5 bg-slate-300 hidden sm:block"></div>
+              <div className="flex items-center gap-2 text-indigo-600 font-bold">Completado: {answeredCount} / {totalQs}</div>
             </div>
           </div>
-          <div className="space-y-6 mb-8">
+
+          <div className="space-y-8 mb-10">
             {level.questions.map((q, qIndex) => (
-              <div key={q.id} className="bg-slate-50 p-5 rounded-xl border">
-                <h3 className="font-semibold mb-4">{qIndex + 1}. {q.text}</h3>
-                <div className="space-y-2">
-                  {q.options.map((opt, optIndex) => (
-                    <label key={optIndex} className={`flex items-center p-3 border rounded-lg cursor-pointer ${answers[qIndex] === optIndex ? 'bg-indigo-50 border-indigo-500' : 'bg-white'}`}>
-                      <input type="radio" checked={answers[qIndex] === optIndex} onChange={() => setAnswers({...answers, [qIndex]: optIndex})} className="w-4 h-4"/>
-                      <span className="ml-3">{opt}</span>
-                    </label>
-                  ))}
+              <div key={q.id} className="animate-in fade-in slide-in-from-bottom-4" style={{animationDelay: `${qIndex * 100}ms`}}>
+                <h3 className="font-bold text-lg text-slate-800 mb-4 leading-snug">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 mr-3 text-sm">{qIndex + 1}</span> 
+                  {q.text}
+                </h3>
+                <div className="grid gap-3 ml-11">
+                  {q.options.map((opt, optIndex) => {
+                    const isSelected = answers[qIndex] === optIndex;
+                    return (
+                      <label 
+                        key={optIndex} 
+                        className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all duration-200 group ${isSelected ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-white border-slate-100 hover:border-indigo-300 hover:bg-slate-50'}`}
+                      >
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 group-hover:border-indigo-400 bg-white'}`}>
+                          {isSelected && <CheckCircle className="w-4 h-4 text-white" />}
+                        </div>
+                        <span className={`ml-4 font-medium text-base ${isSelected ? 'text-indigo-900' : 'text-slate-600'}`}>{opt}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </div>
-          {level.questions.length > 0 && <div className="flex justify-end border-t pt-6"><button onClick={submitQuiz} disabled={Object.keys(answers).length < level.questions.length} className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg disabled:opacity-50">Enviar</button></div>}
+          
+          {level.questions.length > 0 && (
+            <div className="flex justify-end pt-8 border-t border-slate-100">
+              <button 
+                onClick={submitQuiz} 
+                disabled={answeredCount < totalQs} 
+                className={`w-full sm:w-auto px-10 py-4 font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 ${answeredCount < totalQs ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-slate-800 hover:bg-slate-900 hover:-translate-y-1 text-white'}`}
+              >
+                Enviar Respuestas <ChevronRight className="w-5 h-5"/>
+              </button>
+            </div>
+          )}
         </div>
       )}
+
       {view === 'quiz' && quizSubmitted && (
-        <div className="bg-white p-10 rounded-xl shadow text-center border print:hidden">
-          <h2 className="text-3xl font-bold mb-4">{currentScore >= settings.passingScore ? '¡Aprobado!' : 'No alcanzaste el mínimo.'}</h2>
-          <div className="text-6xl font-black mb-6">{currentScore} <span className="text-2xl text-slate-400">/ {settings.maxScore}</span></div>
-          <div className="flex justify-center gap-3">
-            <button onClick={() => setView('material')} className="px-6 py-3 border rounded-lg font-bold">Material</button>
-            {currentScore >= settings.passingScore ? <button onClick={() => setView('certificate')} className="px-6 py-3 bg-green-600 text-white font-bold rounded-lg">Certificado</button> : <button onClick={() => { setAnswers({}); setQuizSubmitted(false); }} className="px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg">Reintentar</button>}
+        <div className="bg-white p-12 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center animate-in zoom-in duration-500 print:hidden relative overflow-hidden">
+          {currentScore >= settings.passingScore ? (
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-50 via-white to-white opacity-70"></div>
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-50 via-white to-white opacity-70"></div>
+          )}
+          
+          <div className="relative z-10">
+            <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 shadow-xl ${currentScore >= settings.passingScore ? 'bg-emerald-500 text-white shadow-emerald-200' : 'bg-rose-500 text-white shadow-rose-200'}`}>
+              {currentScore >= settings.passingScore ? <Award className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2">
+              {currentScore >= settings.passingScore ? '¡Felicidades, Aprobaste!' : 'No alcanzaste el mínimo requerido'}
+            </h2>
+            <p className="text-slate-500 font-medium mb-8">
+              {currentScore >= settings.passingScore ? 'Has completado este módulo con éxito.' : 'Te sugerimos repasar el material e intentarlo nuevamente.'}
+            </p>
+            
+            <div className="flex flex-col items-center justify-center mb-10">
+              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2">Tu Calificación</span>
+              <div className="flex items-baseline gap-2">
+                <span className={`text-7xl font-black tracking-tighter ${currentScore >= settings.passingScore ? 'text-emerald-600' : 'text-rose-600'}`}>{currentScore}</span>
+                <span className="text-2xl font-bold text-slate-300">/ {settings.maxScore}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <button onClick={() => setView('material')} className="px-8 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors">
+                Volver al Material
+              </button>
+              {currentScore >= settings.passingScore ? (
+                <button onClick={() => setView('certificate')} className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2">
+                  <CheckCircle className="w-5 h-5"/> Ver Certificado
+                </button>
+              ) : (
+                <button onClick={() => { setAnswers({}); setQuizSubmitted(false); }} className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+                  Reintentar Evaluación
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
+      
       {view === 'certificate' && (
         <div>
           <div className="mb-4 flex justify-between print:hidden">
